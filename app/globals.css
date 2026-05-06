@@ -2,14 +2,48 @@
 
 :root {
   color-scheme: light;
-  --background: #f4f5f7;
-  --foreground: #151515;
-  --muted: #667085;
-  --card: rgba(255, 255, 255, 0.92);
-  --line: rgba(21, 21, 21, 0.08);
-  --rose: #c95f7c;
-  --teal: #1c7d75;
-  --gold: #b88a2a;
+  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --background: #f3f1ed;
+  --background-alt: #fbf7f3;
+  --surface: rgba(255, 252, 249, 0.86);
+  --surface-strong: #fffaf5;
+  --panel: rgba(255, 250, 245, 0.74);
+  --panel-dark: linear-gradient(180deg, #111827 0%, #0b1326 100%);
+  --foreground: #161618;
+  --muted: #625f68;
+  --line: rgba(42, 31, 30, 0.09);
+  --line-strong: rgba(42, 31, 30, 0.18);
+  --accent: #de6e90;
+  --accent-soft: rgba(238, 191, 206, 0.34);
+  --secondary: #4e9d95;
+  --secondary-soft: rgba(143, 213, 202, 0.28);
+  --danger-soft: rgba(255, 227, 230, 0.92);
+  --danger-line: rgba(214, 84, 104, 0.28);
+  --danger-text: #a63e53;
+  --shadow: rgba(53, 33, 46, 0.12);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #08111b;
+  --background-alt: #0d1623;
+  --surface: rgba(17, 25, 39, 0.82);
+  --surface-strong: #111b2c;
+  --panel: rgba(12, 18, 30, 0.74);
+  --panel-dark: linear-gradient(180deg, #131c2b 0%, #0a1019 100%);
+  --foreground: #edf1f7;
+  --muted: #9ba8be;
+  --line: rgba(197, 212, 230, 0.11);
+  --line-strong: rgba(197, 212, 230, 0.22);
+  --accent: #ef8ba9;
+  --accent-soft: rgba(239, 139, 169, 0.13);
+  --secondary: #81cfc1;
+  --secondary-soft: rgba(129, 207, 193, 0.12);
+  --danger-soft: rgba(108, 31, 47, 0.36);
+  --danger-line: rgba(226, 110, 138, 0.3);
+  --danger-text: #ffb7c7;
+  --shadow: rgba(0, 0, 0, 0.34);
 }
 
 * {
@@ -24,13 +58,14 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(201, 95, 124, 0.08), transparent 28%),
-    radial-gradient(circle at top right, rgba(28, 125, 117, 0.08), transparent 24%),
-    linear-gradient(180deg, #fafafb 0%, #eef1f4 100%);
+    radial-gradient(circle at left top, rgba(241, 122, 157, 0.14), transparent 28%),
+    radial-gradient(circle at right top, rgba(108, 211, 196, 0.16), transparent 26%),
+    linear-gradient(180deg, var(--background-alt) 0%, var(--background) 100%);
   color: var(--foreground);
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: var(--font-sans);
+  transition:
+    background 220ms ease,
+    color 220ms ease;
 }
 
 button,
@@ -43,4 +78,261 @@ textarea {
 img {
   display: block;
   max-width: 100%;
+}
+
+::selection {
+  background: rgba(222, 110, 144, 0.24);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.looklab-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.looklab-kicker {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.looklab-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 34px;
+  background: var(--panel);
+  box-shadow: 0 30px 90px var(--shadow);
+  backdrop-filter: blur(22px);
+}
+
+.looklab-panel-soft {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface), rgba(255, 255, 255, 0.04));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.looklab-panel-dark {
+  background: var(--panel-dark);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 24px 70px rgba(0, 0, 0, 0.3);
+}
+
+.looklab-gallery-card {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface), rgba(255, 255, 255, 0.03));
+  box-shadow: 0 18px 46px var(--shadow);
+}
+
+.looklab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.45rem 0.8rem;
+}
+
+.looklab-chip,
+.looklab-chip-active,
+.looklab-chip-on-dark,
+.looklab-chip-on-dark-active,
+.looklab-button-primary,
+.looklab-button-dark,
+.looklab-button-dark-secondary,
+.looklab-button-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.looklab-chip,
+.looklab-chip-active,
+.looklab-chip-on-dark,
+.looklab-chip-on-dark-active {
+  padding: 0.65rem 0.95rem;
+}
+
+.looklab-chip {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.looklab-chip:hover {
+  border-color: var(--line-strong);
+  color: var(--foreground);
+}
+
+.looklab-chip-active {
+  border: 1px solid rgba(222, 110, 144, 0.24);
+  background: linear-gradient(180deg, var(--accent), #c85b7d);
+  box-shadow: 0 10px 24px rgba(222, 110, 144, 0.22);
+  color: #fff8fb;
+}
+
+.looklab-chip-on-dark {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.looklab-chip-on-dark:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.looklab-chip-on-dark-active {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: white;
+  color: #0b1326;
+}
+
+.looklab-button-primary,
+.looklab-button-dark,
+.looklab-button-dark-secondary,
+.looklab-button-ghost {
+  padding: 0.95rem 1.15rem;
+}
+
+.looklab-button-primary {
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, var(--accent), #cb5e81);
+  box-shadow: 0 14px 28px rgba(222, 110, 144, 0.28);
+  color: white;
+}
+
+.looklab-button-primary:hover {
+  transform: translateY(-1px);
+}
+
+.looklab-button-dark {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: white;
+  color: #0d1322;
+}
+
+.looklab-button-dark:hover {
+  transform: translateY(-1px);
+}
+
+.looklab-button-dark-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+
+.looklab-button-dark-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.looklab-button-ghost {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.looklab-button-ghost:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-strong);
+}
+
+.looklab-button-primary:disabled,
+.looklab-button-dark:disabled,
+.looklab-button-dark-secondary:disabled,
+.looklab-button-ghost:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.45;
+  transform: none;
+}
+
+.looklab-brand-mark {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.1)),
+    linear-gradient(135deg, #f391b0, #88d3c7);
+}
+
+.looklab-orb {
+  position: absolute;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(241, 122, 157, 0.28), transparent 70%);
+  filter: blur(10px);
+}
+
+.looklab-orb-secondary {
+  background: radial-gradient(circle, rgba(108, 211, 196, 0.22), transparent 72%);
+}
+
+.looklab-empty-state {
+  background:
+    radial-gradient(circle at top left, rgba(222, 110, 144, 0.08), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(129, 207, 193, 0.12), transparent 26%),
+    linear-gradient(180deg, var(--surface), rgba(255, 255, 255, 0.02));
+}
+
+.looklab-range {
+  width: 100%;
+  appearance: none;
+  background: transparent;
+}
+
+.looklab-range:focus {
+  outline: none;
+}
+
+.looklab-range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.looklab-range::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.looklab-range::-webkit-slider-thumb {
+  margin-top: -6px;
+  height: 20px;
+  width: 20px;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.26);
+}
+
+.looklab-range::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border: 0;
+  border-radius: 999px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.26);
 }

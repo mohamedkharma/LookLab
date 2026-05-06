@@ -5,7 +5,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "LookLab",
   description:
-    "Upload a selfie, choose a beauty style, and generate realistic facial preview images with Gemini.",
+    "Upload a selfie, compare beauty preview edits, and build a polished shortlist of realistic AI simulations.",
+  themeColor: [
+    { color: "#fbf7f3", media: "(prefers-color-scheme: light)" },
+    { color: "#08111b", media: "(prefers-color-scheme: dark)" },
+  ],
 };
 
 export default function RootLayout({
@@ -14,8 +18,8 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" data-theme="dark">
+        <body>{children}</body>
     </html>
   );
 }

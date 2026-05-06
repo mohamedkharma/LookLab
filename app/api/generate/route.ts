@@ -1,20 +1,30 @@
-import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 import { getBeautyStyle } from "@/lib/beauty-styles";
 
 export const runtime = "nodejs";
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const DEFAULT_MODEL = "google/gemini-3.1-flash-image-preview";
 
 type GeneratePayload = {
   imageDataUrl?: string;
   styleId?: string;
+  intensity?: "subtle" | "balanced" | "dramatic";
 };
 
-type CandidatePart = {
-  text?: string;
-  inlineData?: {
-    mimeType?: string;
-    data?: string;
+type OpenRouterResponse = {
+  error?: {
+    message?: string;
   };
+  choices?: Array<{
+    message?: {
+      content?: string;
+      images?: Array<{
+        image_url?: {
+          url?: string;
+        };
+      }>;
+    };
+  }>;
 };
 
 function parseDataUrl(dataUrl: string) {
@@ -30,21 +40,15 @@ function parseDataUrl(dataUrl: string) {
   };
 }
 
-function hasInlineData(part: CandidatePart) {
-  return Boolean(part.inlineData?.data && part.inlineData?.mimeType);
-}
-
-function hasText(part: CandidatePart) {
-  return typeof part.text === "string" && part.text.trim().length > 0;
-}
-
 export async function POST(request: Request) {
   try {
-    const { imageDataUrl, styleId } = (await request.json()) as GeneratePayload;
+    const { imageDataUrl, styleId, intensity } = (await request.json()) as GeneratePayload;
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "Missing GEMINI_API_KEY. Add it to your .env.local file." },
+        { error: "Missing OPENROUTER_API_KEY. Add it to your .env.local or .env file." },
         { status: 500 },
       );
     }
@@ -62,6 +66,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unknown beauty style." }, { status: 400 });
     }
 
+    const safeIntensity =
+      intensity === "subtle" || intensity === "balanced" || intensity === "dramatic"
+        ? intensity
+        : "balanced";
+
     const imagePart = parseDataUrl(imageDataUrl);
 
     if (!imagePart) {
@@ -71,65 +80,83 @@ export async function POST(request: Request) {
       );
     }
 
-    const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    });
-
     const prompt = `
 Create a single realistic beauty preview from the uploaded selfie.
 
 Transformation to apply:
 ${style.prompt}
 
+Requested intensity:
+${safeIntensity}
+
 Requirements:
 - Keep the exact same person and preserve recognizability.
 - Preserve pose, framing, gaze direction, hairline, expression, and overall lighting.
+- Do not mirror, flip, rotate, zoom, crop, or reframe the face.
+- Keep the same left-right orientation and the same camera distance as the input image.
 - Make only the requested change. Do not add unrelated edits.
-- Keep the result tasteful, photorealistic, and subtle but visible.
+- Keep the result tasteful, photorealistic, and aligned to the requested intensity.
+- If intensity is subtle, make the change refined and conservative.
+- If intensity is balanced, make the change clearly visible but still natural.
+- If intensity is dramatic, make the change stronger while keeping the same person believable.
 - Maintain believable skin texture and human detail.
+- Keep this as a visual simulation only, not a medical or treatment claim.
 - Return one edited portrait image only.
 - No text, no split screen, no collage, no watermark, no extra objects, no background change.
 `.trim();
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-image-preview",
-      contents: [
-        { text: prompt },
-        {
-          inlineData: {
-            mimeType: imagePart.mimeType,
-            data: imagePart.data,
-          },
-        },
-      ],
-      config: {
-        responseModalities: ["TEXT", "IMAGE"],
+    const response = await fetch(OPENROUTER_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        model,
+        modalities: ["image", "text"],
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: prompt,
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${imagePart.mimeType};base64,${imagePart.data}`,
+                },
+              },
+            ],
+          },
+        ],
+      }),
     });
 
-    const parts = (response.candidates?.[0]?.content?.parts ?? []) as CandidatePart[];
-    const generatedImage = parts.find(hasInlineData);
-    const modelNotes = parts
-      .filter(hasText)
-      .map((part) => part.text)
-      .join("\n")
-      .trim();
+    const payload = (await response.json()) as OpenRouterResponse;
+    const message = payload.choices?.[0]?.message;
+    const generatedImage = message?.images?.[0]?.image_url?.url;
+    const modelNotes =
+      typeof message?.content === "string" ? message.content.trim() : "";
 
-    if (!generatedImage || !generatedImage.inlineData?.data || !generatedImage.inlineData?.mimeType) {
+    if (!response.ok || !generatedImage) {
       return NextResponse.json(
         {
           error:
+            payload.error?.message ||
             modelNotes ||
-            "Gemini did not return an image for this request. Try a different photo or style.",
+            "OpenRouter did not return an image for this request. Try a different photo or style.",
         },
-        { status: 502 },
+        { status: response.ok ? 502 : response.status },
       );
     }
 
     return NextResponse.json({
       styleId,
       styleLabel: style.label,
-      imageDataUrl: `data:${generatedImage.inlineData.mimeType};base64,${generatedImage.inlineData.data}`,
+      intensity: safeIntensity,
+      imageDataUrl: generatedImage,
       modelNotes,
     });
   } catch (error) {

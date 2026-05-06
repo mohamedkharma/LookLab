@@ -123,7 +123,7 @@ The first MVP should not require accounts or persistent storage.
 
 ## Development Commands
 
-Create a `.env.local` file with your Gemini API key before running the app.
+Create a `.env.local` file with your OpenRouter API key before running the app.
 
 ```bash
 npm install
@@ -138,7 +138,8 @@ npm run lint
 ## Environment Variables
 
 ```bash
-GEMINI_API_KEY=your_google_ai_studio_key_here
+OPENROUTER_API_KEY=your_openrouter_key_here
+OPENROUTER_MODEL=google/gemini-3.1-flash-image-preview
 ```
 
 ## Status
